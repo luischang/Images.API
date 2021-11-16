@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Image Page";
+}
+
+@*
+
+    Author:     Luis Chang
+    Date  :     15/11/2021
+*@
+
+@*<form>*@
+<div class="form-group row">
+    <div class="form-group col-md-6">
+        <label for="exampleFormControlFile1">Insert a local image</label>
+        <input type="file" class="form-control-file" id="txtImageLocal">
+        <br />
+        <button class="btn btn-info" id="btnLocalImage">Save local image</button>
+    </div>
+
+    <div class="col-md-4">
+        <img src="" alt="Image Local" id="imgLocal" />
+    </div>
+
+</div>
+<div class="form-group row">
+    <div class="form-group col-md-6">
+        <label for="inputEmail4">Insert an image from URL</label>
+        <input type="text" class="form-control" id="txtImageURL">
+        <br />
+        <button class="btn btn-success" id="btnURLImage">Save URL image</button>
+    </div>
+    <div class="col-md-4">
+        <img src="" alt="Image Local" id="imgURL" />
+    </div>
+</div>
+@*</form>*@
+
+
+<script>
+
+    $('#btnLocalImage').click(function () {
+        let vFotoUpload = $("#txtImageLocal").get(0);
+        let files = vFotoUpload.files;
+        //Recibir la imagen en bytearray
+        let fData = new FormData();
+        fData.append('file', $('#txtImageLocal')[0].files[0]);
+        //fData.append('otherParams1', 'Cristiano Ronaldo');
+        //fData.append('otherParams2', 'Lionel Messi');
+        for (var i = 0; i < files.length; i++) {
+            fData.append(files[i].name, files[i]);
+        }
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ConvertImage", "Home")',
+            data: fData,
+            processData: false,
+            contentType: false,
+            cache:false,
+            success: function () {
+                alert("OK");
+            }
+
+        });
+
+    });
+
+
+</script>
