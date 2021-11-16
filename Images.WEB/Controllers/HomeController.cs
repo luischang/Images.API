@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Images.WEB.Controllers
@@ -25,12 +28,37 @@ namespace Images.WEB.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult ConvertImage()
+        public async Task<IActionResult> ConvertImage()
         {
             var fileImage = Request.Form.Files[0];
-            //Call to API and send image to bytearray
-           
-            return Json("Ok");
+            string convertImage = ConvertToBase64String(fileImage);//Convert to base64
+            //Create object
+            var objPlayer = new
+            {
+                FullName = "Cristiano Ronaldo",
+                Image = convertImage
+            };
+            //Serialize object
+            var json = JsonConvert.SerializeObject(objPlayer);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            //Call API -  Post Endpoint
+            using var httpClient = new HttpClient();
+            using var response = await httpClient
+                .PostAsync("http://localhost:30651/api/Image/Player", data);
+            string apiResponse = await response.Content.ReadAsStringAsync();
+            //Return filename
+            var fileNameResponse = JsonConvert.DeserializeObject<string>(apiResponse);
+            return Json(fileNameResponse);
+        }
+
+        private string ConvertToBase64String(IFormFile file)
+        {
+            using (var ms = new MemoryStream())
+            {
+                file.CopyTo(ms);
+                var fileBytes = ms.ToArray();
+                return Convert.ToBase64String(fileBytes);
+            }
         }
 
         private byte[] ConvertToBytes(IFormFile image)
@@ -39,18 +67,6 @@ namespace Images.WEB.Controllers
             BinaryReader reader = new BinaryReader(image.OpenReadStream());
             CoverImageBytes = reader.ReadBytes((int)image.Length);
             return CoverImageBytes;
-        }
-
-
-        //public IActionResult Privacy()
-        //{
-        //    return View();
-        //}
-
-        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        //public IActionResult Error()
-        //{
-        //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        //}
+        }     
     }
 }
