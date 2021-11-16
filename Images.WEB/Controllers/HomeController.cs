@@ -51,7 +51,7 @@ namespace Images.WEB.Controllers
             return Json(fileNameResponse);
         }
 
-        private string ConvertToBase64String(IFormFile file)
+        private static string ConvertToBase64String(IFormFile file)
         {
             using (var ms = new MemoryStream())
             {
@@ -59,14 +59,6 @@ namespace Images.WEB.Controllers
                 var fileBytes = ms.ToArray();
                 return Convert.ToBase64String(fileBytes);
             }
-        }
-
-        private byte[] ConvertToBytes(IFormFile image)
-        {
-            byte[] CoverImageBytes = null;
-            BinaryReader reader = new BinaryReader(image.OpenReadStream());
-            CoverImageBytes = reader.ReadBytes((int)image.Length);
-            return CoverImageBytes;
-        }     
+        }    
     }
 }
